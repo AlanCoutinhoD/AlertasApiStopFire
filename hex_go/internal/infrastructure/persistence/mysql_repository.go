@@ -162,7 +162,7 @@ func (r *MySQLRepository) fetchAlertsFromTable(tableName string, serialNumbers [
 		args[i] = sn
 	}
 	
-	// Use the correct column names based on the table
+	
 	idColumn := fmt.Sprintf("id%s", tableName)
 	
 	query := fmt.Sprintf(
