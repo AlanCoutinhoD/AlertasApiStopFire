@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"log"
 	"net/http"
 
 	"hex_go/internal/application/services"
@@ -24,16 +26,31 @@ func NewSensorController(sensorService *services.SensorService) *SensorControlle
 func (c *SensorController) CreateSensorData(w http.ResponseWriter, r *http.Request) {
 	var sensorData entities.SensorDataRequest
 
-	// Decode the request body
-	err := json.NewDecoder(r.Body).Decode(&sensorData)
+	// Read the request body
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	
+	// Log the received JSON for debugging
+	log.Printf("Received JSON: %s", string(body))
+
+	// Decode the request body
+	err = json.Unmarshal(body, &sensorData)
+	if err != nil {
+		log.Printf("Error decoding JSON: %v", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
+	// Log the parsed data
+	log.Printf("Parsed sensor data: %+v", sensorData)
+
 	// Process the sensor data
 	err = c.sensorService.ProcessSensorData(&sensorData)
 	if err != nil {
+		log.Printf("Error processing sensor data: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

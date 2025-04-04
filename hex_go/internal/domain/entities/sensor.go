@@ -38,9 +38,9 @@ type SensorDHT22 struct {
 
 // SensorDataRequest represents the incoming request for sensor data
 type SensorDataRequest struct {
-	NumeroSerie        string `json:"numeroSerie"`
-	Sensor             string `json:"sensor"`
-	FechaActivacion    string `json:"fecha_activacion"`
-	FechaDesactivacion string `json:"fecha_desactivacion"`
-	Estado             int    `json:"estado"`
+	NumeroSerie        string      `json:"numeroSerie"`
+	Sensor             string      `json:"sensor"`
+	FechaActivacion    string      `json:"fecha_activacion"`
+	FechaDesactivacion string      `json:"fecha_desactivacion"`
+	Estado             interface{} `json:"estado"` // Changed from int to interface{} to handle both int and string
 }
