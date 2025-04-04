@@ -62,16 +62,20 @@ func NewRabbitMQClient(cfg *config.Config) (*RabbitMQClient, error) {
 
 	// Create queues
 	queues := map[string]string{
-		"KY026":  cfg.RabbitMQQueueKY026,
-		"MQ2":    cfg.RabbitMQQueueMQ2,
-		"MQ135":  cfg.RabbitMQQueueMQ135,
-		"DHT22":  cfg.RabbitMQQueueDHT22,
+		"KY_026": cfg.RabbitMQQueueKY026,
+		"MQ_2":   cfg.RabbitMQQueueMQ2,
+		"MQ_135": cfg.RabbitMQQueueMQ135,
+		"DHT_22": cfg.RabbitMQQueueDHT22,
 	}
 
+	log.Printf("Creating and binding queues to exchange: %s", cfg.RabbitMQExchange)
 	for sensorType, queueName := range queues {
+		log.Printf("Declaring queue: %s for sensor type: %s", queueName, sensorType)
+		
+		// Declare the queue with more durable settings
 		_, err = channel.QueueDeclare(
 			queueName, // name
-			true,      // durable
+			true,      // durable - survive broker restart
 			false,     // delete when unused
 			false,     // exclusive
 			false,     // no-wait
@@ -82,8 +86,13 @@ func NewRabbitMQClient(cfg *config.Config) (*RabbitMQClient, error) {
 			conn.Close()
 			return nil, fmt.Errorf("failed to declare queue %s: %w", queueName, err)
 		}
+		
+		log.Printf("Queue %s declared successfully", queueName)
 
 		// Bind queue to exchange
+		log.Printf("Binding queue %s to exchange %s with routing key %s", 
+			queueName, cfg.RabbitMQExchange, sensorType)
+		
 		err = channel.QueueBind(
 			queueName,            // queue name
 			sensorType,           // routing key
@@ -96,6 +105,8 @@ func NewRabbitMQClient(cfg *config.Config) (*RabbitMQClient, error) {
 			conn.Close()
 			return nil, fmt.Errorf("failed to bind queue %s: %w", queueName, err)
 		}
+		
+		log.Printf("Queue %s bound successfully to exchange %s", queueName, cfg.RabbitMQExchange)
 	}
 
 	return &RabbitMQClient{
@@ -117,10 +128,13 @@ func (c *RabbitMQClient) PublishSensorData(data *entities.SensorDataRequest) err
 		return fmt.Errorf("failed to marshal sensor data: %w", err)
 	}
 
+	// Use sensor type directly as routing key
+	routingKey := data.Sensor
+
 	// Publish message
 	err = c.channel.Publish(
 		c.exchangeName, // exchange
-		data.Sensor,    // routing key
+		routingKey,     // routing key
 		false,          // mandatory
 		false,          // immediate
 		amqp.Publishing{
@@ -131,8 +145,25 @@ func (c *RabbitMQClient) PublishSensorData(data *entities.SensorDataRequest) err
 		return fmt.Errorf("failed to publish message: %w", err)
 	}
 
-	log.Printf("Published message to %s queue: %s", data.Sensor, string(body))
+	log.Printf("Published message to %s queue with routing key %s: %s", 
+		getQueueNameForSensor(routingKey, c), routingKey, string(body))
 	return nil
+}
+
+// Helper function to get queue name for logging
+func getQueueNameForSensor(sensorType string, c *RabbitMQClient) string {
+	switch sensorType {
+	case "KY_026":
+		return c.queueKY026
+	case "MQ_2":
+		return c.queueMQ2
+	case "MQ_135":
+		return c.queueMQ135
+	case "DHT_22":
+		return c.queueDHT22
+	default:
+		return "unknown"
+	}
 }
 
 // Close closes the RabbitMQ connection and channel
