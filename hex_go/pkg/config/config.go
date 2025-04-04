@@ -22,20 +22,38 @@ type Config struct {
 
 // LoadConfig loads configuration from environment variables
 func LoadConfig() *Config {
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Printf("Warning: Error loading .env file: %v", err)
-	}
+    // Try to load .env file from multiple possible locations
+    envPaths := []string{
+        ".env",
+        "../.env",
+        "../../.env",
+    
+    }
+    
+    var loadErr error
+    for _, path := range envPaths {
+        err := godotenv.Load(path)
+        if err == nil {
+            log.Printf("Successfully loaded .env from %s", path)
+            loadErr = nil
+            break
+        }
+        loadErr = err
+    }
+    
+    if loadErr != nil {
+        log.Printf("Warning: Error loading .env file: %v", loadErr)
+        log.Printf("Using default or environment values instead")
+    }
 
-	return &Config{
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "3306"),
-		DBUser:     getEnv("DB_USER", "root"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", "stopfire"),
-		ServerPort: getEnv("SERVER_PORT", "8080"),
-	}
+    return &Config{
+        DBHost:     getEnv("DB_HOST", "localhost"),
+        DBPort:     getEnv("DB_PORT", "3306"),
+        DBUser:     getEnv("DB_USER", "root"),
+        DBPassword: getEnv("DB_PASSWORD", ""),
+        DBName:     getEnv("DB_NAME", "stopfire"),
+        ServerPort: getEnv("SERVER_PORT", "8080"),
+    }
 }
 
 // ConnectDB establishes a connection to the database
