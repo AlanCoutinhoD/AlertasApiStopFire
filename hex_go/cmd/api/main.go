@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"hex_go/internal/application/services"
 	"hex_go/internal/infrastructure/controllers"
 	"hex_go/internal/infrastructure/persistence"
@@ -38,8 +39,21 @@ func main() {
 	// Define routes
 	router.HandleFunc("/api/sensors", sensorController.CreateSensorData).Methods("POST")
 
+	// Set up CORS middleware
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Allow all origins
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	})
+
+	// Apply CORS middleware to router
+	handler := c.Handler(router)
+
 	// Start server
 	serverAddr := fmt.Sprintf(":%s", cfg.ServerPort)
 	log.Printf("Server starting on %s", serverAddr)
-	log.Fatal(http.ListenAndServe(serverAddr, router))
+	log.Fatal(http.ListenAndServe(serverAddr, handler))
 }
