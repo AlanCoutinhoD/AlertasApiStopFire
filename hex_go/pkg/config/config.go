@@ -39,9 +39,10 @@ func LoadConfig() *Config {
 	// Try to load .env file from multiple possible locations
 	envPaths := []string{
 		".env",
-		"../hex_go/.env",
-		"../../hex_go/.env",
-		"c:/Users/22119/OneDrive/Escritorio/INTER5/AlertasApi/hex_go/.env",
+		"../.env",
+		"../../.env",
+		"../../../.env",
+		"./hex_go/.env",
 	}
 	
 	var loadErr error
