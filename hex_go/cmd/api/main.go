@@ -49,6 +49,7 @@ func main() {
 
 	// Define routes
 	router.HandleFunc("/api/sensors", sensorController.CreateSensorData).Methods("POST")
+	router.HandleFunc("/api/alerts", sensorController.GetUserAlerts).Methods("GET")
 
 	// Set up CORS middleware
 	c := cors.New(cors.Options{

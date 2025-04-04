@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+
 	"hex_go/internal/domain/entities"
 	"hex_go/internal/domain/repositories"
 	"hex_go/pkg/rabbitmq"
@@ -139,4 +140,9 @@ func (s *SensorService) ProcessSensorData(data *entities.SensorDataRequest) erro
 	}
 	
 	return nil
+}
+
+// GetUserAlerts retrieves all alerts for a user based on their ID
+func (s *SensorService) GetUserAlerts(userID int) (map[string]interface{}, error) {
+	return s.repo.GetUserAlerts(userID)
 }

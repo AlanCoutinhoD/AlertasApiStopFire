@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv" 
 
 	"hex_go/internal/application/services"
 	"hex_go/internal/domain/entities"
@@ -61,4 +62,33 @@ func (c *SensorController) CreateSensorData(w http.ResponseWriter, r *http.Reque
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Sensor data created successfully",
 	})
+}
+
+// GetUserAlerts handles retrieving all alerts for a user
+func (c *SensorController) GetUserAlerts(w http.ResponseWriter, r *http.Request) {
+	// Get user ID from URL parameter
+	userIDStr := r.URL.Query().Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "Missing user_id parameter", http.StatusBadRequest)
+		return
+	}
+	
+	// Convert user ID to integer
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id parameter", http.StatusBadRequest)
+		return
+	}
+	
+	// Get alerts for this user
+	alerts, err := c.sensorService.GetUserAlerts(userID)
+	if err != nil {
+		log.Printf("Error getting user alerts: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	// Return alerts
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(alerts)
 }

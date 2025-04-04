@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/rs/cors v1.11.1 // indirect
 	github.com/streadway/amqp v1.1.0 // indirect
 )
