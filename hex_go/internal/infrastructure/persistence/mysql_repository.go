@@ -59,6 +59,7 @@ func (r *MySQLRepository) CreateMQ135(sensor *entities.SensorMQ135) error {
 	return nil
 }
 
+
 // CreateDHT22 inserts a new DHT_22 sensor record
 func (r *MySQLRepository) CreateDHT22(sensor *entities.SensorDHT22) error {
 	query := `INSERT INTO DHT_22 (fecha_activacion, fecha_desactivacion, estado, numero_serie) 

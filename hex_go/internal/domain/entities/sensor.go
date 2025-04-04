@@ -32,7 +32,7 @@ type SensorDHT22 struct {
 	ID                 int    `json:"id"`
 	FechaActivacion    string `json:"fecha_activacion"`
 	FechaDesactivacion string `json:"fecha_desactivacion"`
-	Estado             int    `json:"estado"`
+	Estado             string `json:"estado"` // Changed from int to string
 	NumeroSerie        string `json:"numero_serie"`
 }
 

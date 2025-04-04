@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 
 	"hex_go/internal/domain/entities"
 	"hex_go/internal/domain/repositories"
@@ -53,10 +54,13 @@ func (s *SensorService) ProcessSensorData(data *entities.SensorDataRequest) erro
 		}
 		err = s.repo.CreateMQ135(sensor)
 	case "DHT_22":
+		// For DHT_22, convert estado to string
+		estadoStr := fmt.Sprintf("%v", data.Estado)
+		
 		sensor := &entities.SensorDHT22{
 			FechaActivacion:    data.FechaActivacion,
 			FechaDesactivacion: data.FechaDesactivacion,
-			Estado:             data.Estado,
+			Estado:             estadoStr,
 			NumeroSerie:        data.NumeroSerie,
 		}
 		err = s.repo.CreateDHT22(sensor)
