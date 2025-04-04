@@ -11,6 +11,7 @@ import (
 	"hex_go/internal/infrastructure/controllers"
 	"hex_go/internal/infrastructure/persistence"
 	"hex_go/pkg/config"
+	"hex_go/pkg/rabbitmq"
 )
 
 func main() {
@@ -27,8 +28,18 @@ func main() {
 	// Initialize repository
 	repository := persistence.NewMySQLRepository(db)
 
+	// Initialize RabbitMQ client
+	rabbitClient, err := rabbitmq.NewRabbitMQClient(cfg)
+	if err != nil {
+		log.Printf("Warning: Failed to connect to RabbitMQ: %v", err)
+		log.Printf("Continuing without RabbitMQ integration")
+		rabbitClient = nil
+	} else {
+		defer rabbitClient.Close()
+	}
+
 	// Initialize service
-	sensorService := services.NewSensorService(repository)
+	sensorService := services.NewSensorService(repository, rabbitClient)
 
 	// Initialize controller
 	sensorController := controllers.NewSensorController(sensorService)
