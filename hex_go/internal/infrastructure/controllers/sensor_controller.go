@@ -5,19 +5,16 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv" 
-
-	"hex_go/internal/application/services"
+	"strconv"
 	"hex_go/internal/domain/entities"
+	"hex_go/internal/domain/ports"
 )
 
-// SensorController handles HTTP requests for sensors
 type SensorController struct {
-	sensorService *services.SensorService
+	sensorService ports.SensorServicePort
 }
 
-// NewSensorController creates a new sensor controller
-func NewSensorController(sensorService *services.SensorService) *SensorController {
+func NewSensorController(sensorService ports.SensorServicePort) *SensorController {
 	return &SensorController{
 		sensorService: sensorService,
 	}

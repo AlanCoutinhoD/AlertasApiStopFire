@@ -42,5 +42,5 @@ type SensorDataRequest struct {
 	Sensor             string      `json:"sensor"`
 	FechaActivacion    string      `json:"fecha_activacion"`
 	FechaDesactivacion string      `json:"fecha_desactivacion"`
-	Estado             interface{} `json:"estado"` // Changed from int to interface{} to handle both int and string
+	Estado             interface{} `json:"estado"` 
 }

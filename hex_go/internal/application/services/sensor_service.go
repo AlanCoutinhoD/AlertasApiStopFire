@@ -1,27 +1,23 @@
 package services
 
 import (
-	"errors"
-	"fmt"
-	"strconv"
-
-	"hex_go/internal/domain/entities"
-	"hex_go/internal/domain/repositories"
-	"hex_go/pkg/rabbitmq"
+    "errors"
+    "fmt"
+    "strconv"
+    "hex_go/internal/domain/entities"
+    "hex_go/internal/domain/ports"
 )
 
-// SensorService handles the business logic for sensors
 type SensorService struct {
-	repo        repositories.SensorRepository
-	rabbitClient *rabbitmq.RabbitMQClient
+    repo        ports.SensorRepositoryPort
+    rabbitClient ports.MessageQueuePort
 }
 
-// NewSensorService creates a new sensor service
-func NewSensorService(repo repositories.SensorRepository, rabbitClient *rabbitmq.RabbitMQClient) *SensorService {
-	return &SensorService{
-		repo:        repo,
-		rabbitClient: rabbitClient,
-	}
+func NewSensorService(repo ports.SensorRepositoryPort, rabbitClient ports.MessageQueuePort) ports.SensorServicePort {
+    return &SensorService{
+        repo:        repo,
+        rabbitClient: rabbitClient,
+    }
 }
 
 // ProcessSensorData processes incoming sensor data, stores it in the database, and publishes to RabbitMQ

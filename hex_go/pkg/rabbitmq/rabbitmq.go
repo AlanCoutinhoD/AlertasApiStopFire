@@ -7,6 +7,7 @@ import (
 
 	"github.com/streadway/amqp"
 	"hex_go/internal/domain/entities"
+	"hex_go/internal/domain/ports"
 	"hex_go/pkg/config"
 )
 
@@ -150,7 +151,7 @@ func (c *RabbitMQClient) PublishSensorData(data *entities.SensorDataRequest) err
 	return nil
 }
 
-// Helper function to get queue name for logging
+
 func getQueueNameForSensor(sensorType string, c *RabbitMQClient) string {
 	switch sensorType {
 	case "KY_026":
@@ -167,11 +168,24 @@ func getQueueNameForSensor(sensorType string, c *RabbitMQClient) string {
 }
 
 // Close closes the RabbitMQ connection and channel
-func (c *RabbitMQClient) Close() {
-	if c.channel != nil {
-		c.channel.Close()
-	}
-	if c.conn != nil {
-		c.conn.Close()
-	}
+func (c *RabbitMQClient) Close() error {
+    var err error
+    if c.channel != nil {
+        if cerr := c.channel.Close(); cerr != nil {
+            err = fmt.Errorf("error closing channel: %v", cerr)
+        }
+    }
+    if c.conn != nil {
+        if cerr := c.conn.Close(); cerr != nil {
+            if err != nil {
+                err = fmt.Errorf("%v; error closing connection: %v", err, cerr)
+            } else {
+                err = fmt.Errorf("error closing connection: %v", cerr)
+            }
+        }
+    }
+    return err
 }
+
+// Verify interface implementation
+var _ ports.MessageQueuePort = (*RabbitMQClient)(nil)
